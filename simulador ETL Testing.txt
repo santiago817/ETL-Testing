@@ -1,0 +1,71 @@
+import pandas as pd
+
+csv_Cliente = {
+    'idCliente': [1, 2, 3, 4, 5],
+    'DNI': [12345678, 87654321, 12345678, 23456789, 87654321],
+    'Nombre': ['Ana', 'Luis', 'Ana', 'Carlos', 'Luis'],
+    'Apellido': ['Perez', 'Gomez', 'Perez', 'Ramirez', 'Gomez'],
+    'Fecha': ['2000/05/10', '1995/12/12', None, '1986/10/06', None]
+}
+
+df_csv = pd.DataFrame(csv_Cliente)
+
+print("Datos Extraídos")
+print(df_csv)
+
+
+
+data_cleaned = df_csv.drop_duplicates(subset=['DNI', 'Nombre', 'Apellido', 'Fecha'])
+data_cleaned['Fecha'] = pd.to_datetime(data_cleaned['Fecha'], errors='coerce', format='%Y-%m-%d')
+
+print("\nDatos después de la Transformación:")
+print(data_cleaned)
+
+
+
+
+data_loaded = data_cleaned
+print("\nDatos cargados (reparado):")
+print(data_loaded)
+
+
+
+
+
+#instalar en la terminal de python
+
+pip install great_expectations.
+
+
+
+import great_expectations as ge
+
+df_ge = ge.from_pandas(data_loaded)
+
+df_ge.expect_column_values_to_not_be_null('idCliente')
+df_ge.expect_column_values_to_not_be_null('DNI')
+df_ge.expect_column_values_to_not_be_null('Nombre')
+df_ge.expect_column_values_to_not_be_null('Apellido')
+df_ge.expect_column_values_to_not_be_null('Fecha')
+
+resultados = df_ge.validate()
+
+print("\nResultados: ")
+print(resultados)
+
+
+df_ge.save_expectation_suite(discard_failed_expectations=False)
+
+resultados = df_ge.validate()
+
+print("\nGeneración de Reporte Completada.")
+
+
+
+
+for resultado in resultados:
+    print(f"Expectativa: {resultado['expectation_type']}")
+    print(f"Cumplida: {resultado['success']}")
+    if not resultado['success']:
+        print(f"Detalles: {resultado['result']}")
+    print()
